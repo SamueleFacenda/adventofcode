@@ -19,7 +19,6 @@ with open('input', 'r') as f:
         obsidian = (int(spl[5]), int(spl[8]),0,0)
         clay = (int(part[1].split(' ')[-2]),0,0,0)
         blue.append((ore, clay, obsidian, geodude))
-        print(ore, clay, obsidian, geodude)
 
 def getMust(blue):
     return (
@@ -32,6 +31,7 @@ sums = [1]
 for i in range(2,maxMinute + 2):
     sums.append(i + sums[-1])
 
+print(sums)
 musts = {}
 for b in blue:
     musts[str(b)] = getMust(b)
@@ -59,8 +59,8 @@ def simulateDeque(blue) -> int:
             continue
 
         # controllo se ho possibilita di battere il record
-        #if sums[maxMinute - minute - 1] + ores[-1] + (maxMinute - minute) * robots[-1] <= best:
-        #    continue
+        if sums[maxMinute - minute - 1] + ores[-1] + (maxMinute - minute) * robots[-1] <= best:
+            continue
 
         # robots = [0,0,0,0]
         # ore = [0,0,0,0]
@@ -77,13 +77,46 @@ def simulateDeque(blue) -> int:
 
     return best
 
+
+
+def simulate(blue, min, robots, ores) -> int:
+    stringa = str(min) + str(robots) + str(ores)
+    if stringa in dynamic:
+        return dynamic[stringa]
+
+    if min == maxMinute:
+        return ores[-1]
+    # robots = [0,0,0,0]
+    # ore = [0,0,0,0]
+    ores = [old + rob for old, rob in zip(ores, robots)]
+    best = 0
+    for type, recipe in enumerate(blue):
+        if canBuild(recipe, ores):
+            newRobots = [r for r in robots]
+            newRobots[type] += 1
+            newOres = [o for o in ores]
+            newOres[0] -= recipe[0]
+            if type == 2:
+                newOres[1] -= recipe[1]
+            elif type == 3:
+                newOres[2] -= recipe[1]
+
+            tmp = simulate(blue, min+1, newRobots, newOres)
+            best = max(tmp, best)
+    if not canBuild(musts[str(blue)], ores):
+        tmp = simulate(blue, min + 1, robots, ores)
+        best = max(tmp, best)
+
+    dynamic[stringa] = best
+    return best
+
 quality = []
 #dynamic = {}
-#for i, b in tqdm(enumerate(blue), total= len(blue)):
+for i, b in tqdm(enumerate(blue), total= len(blue)):
     #quality.append((i + 1)* simulate(b, 0, [1,0,0,0], [0,0,0,0]))
     #dynamic = {}
-    #quality.append(simulateDeque(b))
-print(simulateDeque(blue[0]))
+    quality.append(simulateDeque(b))
+
 print(quality)
 print(sum([ (i + 1) * qua for i, qua in enumerate(quality)]))
 
