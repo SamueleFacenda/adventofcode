@@ -6,10 +6,12 @@ from collections import deque
 # 3  geodude
 
 blue: list[tuple[tuple, tuple, tuple, tuple]]= []
-maxMinute = 24
+maxMinute = 32
 
 with open('input', 'r') as f:
     for line in f:
+        if len(blue) == 3:
+            break
         line = line.split(':')[1]
         part = line.split('.')
         ore = (int(part[0].split(' ')[-2]),0,0,0)
@@ -67,8 +69,6 @@ def simulateDeque(blue) -> int:
         # robots = [0,0,0,0]
         # ore = [0,0,0,0]
         for type, recipe in enumerate(blue):
-            # costruisco un robot solo se non ne ho gia abbastanza per costruire ogni robot
-            # costruisco un robot non per geodi solo se non posso gia costruire un geodude a turno
             if canBuild(recipe, ores) and (type == 3 or robots[type] < musts[str(blue)][type]) and (type == 3 or robots[0] < blue[-1][0] or robots[2] < blue[-1][2]):
                 newRobots = [r for r in robots]
                 newRobots[type] += 1
@@ -88,5 +88,9 @@ for i, b in tqdm(enumerate(blue), total= len(blue)):
     #dynamic = {}
     quality.append(simulateDeque(b))
 print(quality)
-print(sum([ (i + 1) * qua for i, qua in enumerate(quality)]))
+#print(sum([ (i + 1) * qua for i, qua in enumerate(quality)]))
+prod = 1
+for q in quality:
+    prod *= q
+print(prod)
 

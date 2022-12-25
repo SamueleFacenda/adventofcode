@@ -218,8 +218,8 @@ total = pow(usefulValves * 2, 4)
 bar = tqdm(total = total)
 
 lastBest = -1
-lastBest = bestMove(start)
-bestt = bestMove(State())
+bestt = bestMove(start)
+#bestt = bestMove(State())
 bar.close()
 
 #print(bestMove(State().move('DD').open().move('BB').open().move('JJ').open().move('HH').open().move('EE').open().move('CC').open()))
