@@ -65,16 +65,44 @@ while len(que) > 0:
         for near in node.near:
             que.append(Update(valve[near], Path(node, path.weight + 1), current.to))
 
-solutions = []
-maxTime = 26
 
-def findSolution(node: Valve, score, time, visited: list[str]):
-    global solutions
-    solutions.append((score, visited))
-    values = []
-    for key, dist in node.routes.items():
-        if name not in visited and key != node.name and time + dist.weight < maxTime - 1:
-            values.append(findSolution(valve[key], score + valve[key].power * (maxTime - time), time + dist.weight, visited + [key]))
-    return max(values) if len(values) > 0 else score
+#print('\n'.join([str(v) for v in valveArray]))
 
-print(findSolution(valve['AA'], 0, 0, []))
+
+maxMinute = 26
+usefulValves = len(primaryNodes)
+dynamic = {}
+
+allPoss = {}
+
+def bestMove(pos, minute, visited, power, mem):
+    if mem:
+        global allPoss
+        if not str(sorted(visited)) in allPoss:
+            allPoss[str(sorted(visited))] = (visited, power)
+        else:
+            if allPoss[str(sorted(visited))][1] < power:
+                allPoss[str(sorted(visited))] = (visited, power)
+    # dynamic programming
+    stringa = str(pos) + str(minute) + str(visited)
+    if stringa in dynamic:
+        return dynamic[stringa]
+
+    # ho aperto tutte le valvole, tiro dritto
+    if len(visited) >= usefulValves :
+        dynamic[stringa] = power
+        return power
+    else:
+        out = []
+        # è aperta, mi muovo da qualche altra parte
+        for key, value in valve[pos].routes.items():
+            if (key not in visited) and value.weight + minute + 1 <= maxMinute:
+                out.append(bestMove(key, minute + value.weight + 1, visited + [key], power + (valve[key].power * (maxMinute - minute - value.weight - 1)), mem))
+        out = max(out) if len(out) > 0 else power
+        dynamic[stringa] = out
+        return out
+
+
+bestMove('AA', 0, [], 0, True)
+
+print(max([bestMove('AA', 0, visited, 0, False) + power for key, (visited, power) in tqdm(allPoss.items())]))
