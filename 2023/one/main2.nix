@@ -15,11 +15,14 @@ let
       str
       (zipLists from to);
 in
+# sum list
 fold (a: b: a+b) 0
+  # line to number
   (map
     (line:
       let
         nums = (filter
+          # is digit
           (ch: (match "^[0-9]$" ch) != null)
           (stringToCharacters 
             (replaceStringsIterative
@@ -29,6 +32,7 @@ fold (a: b: a+b) 0
               line )));
       in (toInt (head nums))*10 + (toInt (last nums))
     )
+    # all the lines
     (filter
       (str: (stringLength str)>0)
       (splitString
