@@ -26,15 +26,11 @@ fold (a: b: a + b) 0
       let
         getMaxAttr = attr: let attrs = catAttrs attr line; in  fold max (head attrs) attrs;
       in
-        (getMaxAttr "blue") * (getMaxAttr "red") * (getMaxAttr "green")
-    )
+        (getMaxAttr "blue") * (getMaxAttr "red") * (getMaxAttr "green"))
+        
     # convert lines to [{blue=12} {red=15;blue=0;}]
     (map
-      # x: every row
-      (x: let
-          # raw text to [id num color ; ...]
-          groups = flatten (filter isList (split "([0-9]+|red|green|blue|;)" x));
-        in
+      (row: 
           # [[num color] [num color num color]] -> [{color=num}...]
           (map
             # [num color num color] -> {color=num;color=num}
@@ -43,7 +39,12 @@ fold (a: b: a + b) 0
                 nameValuePair
                 (filter (x: (match "^[0-9]+$" x) == null) group)
                 (map toInt (filter (x: (match "^[0-9]+$" x) != null) group)))))
-            # [id num color ; num color num color] -> [[num color] [num color num color]]
-            (splitList ";" (tail groups)) ) ) # remove id
+            # [num color ; num color num color] -> [[num color] [num color num color]]
+            (splitList ";" 
+              (tail # remove id
+                (flatten # get ["id" "num" "color" ";" ...]
+                  (filter isList 
+                    # text to [["id"] "something" ["num"] ["color"] ...]
+                    (split "([0-9]+|red|green|blue|;)" row))))) ) )
       
       (fileLines ./input)))
