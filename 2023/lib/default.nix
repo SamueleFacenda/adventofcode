@@ -1,10 +1,10 @@
 # utils to import
 rec {
   lib = (builtins.getFlake "nixpkgs").legacyPackages.${builtins.currentSystem}.lib;
-  inherit (builtins) readFile map filter isInt head match stringLength split isList listToAttrs tail all toString tryEval;
+  inherit (builtins) readFile map filter isInt head match stringLength split isList listToAttrs tail all toString tryEval elemAt lenght;
   inherit (lib.strings) splitString toInt stringToCharacters;
   inherit (lib.lists) fold last flatten zipListsWith;
-  inherit (lib.attrsets) nameValuePair attrByPath catAttrs;
+  inherit (lib.attrsets) nameValuePair attrByPath catAttrs cartesianProductOfSets;
   inherit (lib.debug) traceVal traceValFn;
   inherit (lib.trivial) max;
   fileLines = file: filter

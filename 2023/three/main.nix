@@ -1,35 +1,33 @@
 # run with 'nix-instantiate --eval main.nix'
 with (import ../lib);
-# sum indexes
-fold (a: b: (traceVal (head a)) + b) 0
-  # get only valid lines
-  (filter
-    (line: all
-      (draw:
-      (attrByPath [ "red" ] 0 draw) <= 12 &&
-      (attrByPath [ "green" ] 0 draw) <= 13 &&
-      (attrByPath [ "blue" ] 0 draw) <= 14)
-      
-      (tail line)) # first element is id
-    # convert lines to [id {blue=12} {red=15;blue=0;}]
-    (map
-      # x: every row
-      (x:
-      let
-        # raw text to [id num color ; ...]
-        groups = flatten (filter isList (split "([0-9]+|red|green|blue|;)" x));
+let
+  lines = fileLines ./inputtest;
+  matrix = map stringToCharacters lines;
+  isSymbol = chr: (match "[0-9\\.]" chr) == null;
+  # boolean map of symbols
+  symbol = map (map isSymbol) matrix;
+  isAdiacent = row: col: fold 
+    (cur: prev: prev || (
+      let 
+        x = row+cur.x;
+        y = col+cur.y;
       in
-      # [id num color num color ; num color ; num color] -> [id {color=num} {color=num;color=num}]
-      [ (toInt (head groups)) ] ++ # first element is id
-        # [[num color] [num color num color]] -> [{color=num}...]
-      (map
-        # [num color num color] -> {color=num;color=num}
-        (group: (listToAttrs
-          (zipListsWith
-            nameValuePair
-            (filter (x: (match "^[0-9]+$" x) == null) group)
-            (map toInt (filter (x: (match "^[0-9]+$" x) != null) group)))))
-        # [id num color ; num color num color] -> [[num color] [num color num color]]
-        (splitList ";" (tail groups))))
-
-      (fileLines ./inputtest)))
+      x >= 0 &&
+      x < (length (head symbol)) &&
+      y >= 0 &&
+      y < (length symbol) &&
+      elemAt x (elemAt y symbol)
+    ))
+    false 
+    (cartesianProductOfSets {x=[-1 0 1];y=[-1 0 1];});
+  adiacents = imap0 (rowi: val: imap0 (coli: v: isAdiacent rowi coli) val) matrix;
+  isValidNum = y: x: x >= 0 && x < (length (head adiacents)) &&
+    # is adiacent or, if is a number, left and right are good numbers (recursive)
+    (elemAt x (elemAt y symbol) || 
+    ((match "[0-9]" (elemAt x (elemAt y matrix))) != null && (
+      isValidNum y (x+1) || isValidNum y (x-1)
+    ))
+    );
+  validNums = imap0 (rowi: val: imap0 (coli: v: isValidNum rowi coli) val) matrix;
+in
+  inherit result;
