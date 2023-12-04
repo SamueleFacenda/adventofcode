@@ -3,10 +3,10 @@ rec {
   lib = (builtins.getFlake "nixpkgs").legacyPackages.${builtins.currentSystem}.lib;
   inherit (builtins) readFile map filter isInt head match stringLength split isList listToAttrs tail all toString tryEval elemAt length;
   inherit (lib.strings) splitString toInt stringToCharacters fixedWidthNumber;
-  inherit (lib.lists) fold last flatten zipListsWith imap0 subtractLists unique intersectLists;
-  inherit (lib.attrsets) nameValuePair attrByPath catAttrs cartesianProductOfSets;
+  inherit (lib.lists) fold last flatten zipListsWith imap0 subtractLists unique intersectLists range;
+  inherit (lib.attrsets) nameValuePair attrByPath catAttrs cartesianProductOfSets genAttrs;
   inherit (lib.debug) traceVal traceValFn;
-  inherit (lib.trivial) max boolToString;
+  inherit (lib.trivial) max boolToString const;
   fileLines = file: filter
     (str: (stringLength str) > 0)
     (splitString "\n" (readFile file));
