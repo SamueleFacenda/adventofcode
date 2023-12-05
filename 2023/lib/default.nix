@@ -1,12 +1,12 @@
 # utils to import
 rec {
   lib = (builtins.getFlake "nixpkgs").legacyPackages.${builtins.currentSystem}.lib;
-  inherit (builtins) readFile map filter isInt head match stringLength split isList listToAttrs tail all toString tryEval elemAt length;
+  inherit (builtins) hasAttr deepSeq readFile map filter isInt head match stringLength split isList listToAttrs tail all toString tryEval elemAt length;
   inherit (lib.strings) splitString toInt stringToCharacters fixedWidthNumber;
-  inherit (lib.lists) fold last flatten zipListsWith imap0 subtractLists unique intersectLists range;
-  inherit (lib.attrsets) nameValuePair attrByPath catAttrs cartesianProductOfSets genAttrs;
-  inherit (lib.debug) traceVal traceValFn;
-  inherit (lib.trivial) max boolToString const;
+  inherit (lib.lists) fold last flatten zipListsWith imap0 subtractLists unique intersectLists range drop;
+  inherit (lib.attrsets) nameValuePair attrByPath catAttrs cartesianProductOfSets genAttrs setAttrByPath getAttrFromPath recursiveUpdate;
+  inherit (lib.debug) traceVal traceValFn traceValSeq;
+  inherit (lib.trivial) max boolToString const concat min;
   fileLines = file: filter
     (str: (stringLength str) > 0)
     (splitString "\n" (readFile file));
@@ -19,8 +19,12 @@ rec {
     [ [ ] ]
     list;
   sum = fold (a: b: a+b) 0;
-  minAttr = list: attr: let attrs = catAttrs attr list; in fold max (head attrs) attrs;
+  maxAttr = list: attr: let attrs = catAttrs attr list; in fold max (head attrs) attrs;
   tryOrDefault = default: expr: let res = tryEval expr; in if res.success then res.value else default;
   traceBoolList = traceValFn (y: toString (map (x: if x then "#" else ".") y));
   traceBoolListPrefixed = pre: traceValFn (y: toString ([pre] ++ (map (x: if x then "#" else ".") y)));
+  getNums = x: map toInt (getMatching "([0-9]+)" x);
+  getMatching = regx: line:  flatten (filter isList (split regx line));
+  mapAttrPath = path: op: set: recursiveUpdate set (setAttrByPath path (op (getAttrFromPath path set)));
+  minVal = x: fold min (head x) x;
 }
