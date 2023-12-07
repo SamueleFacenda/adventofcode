@@ -1,8 +1,8 @@
 # utils to import
 rec {
   lib = (builtins.getFlake "nixpkgs").legacyPackages.${builtins.currentSystem}.lib;
-  inherit (builtins) trace mapAttrs hasAttr deepSeq readFile map filter isInt head match stringLength split isList listToAttrs tail all toString tryEval elemAt length;
-  inherit (lib.strings) splitString toInt stringToCharacters fixedWidthNumber;
+  inherit (builtins) floor ceil trace mapAttrs hasAttr deepSeq readFile map filter isInt head match stringLength split isList listToAttrs tail all toString tryEval elemAt length;
+  inherit (lib.strings) splitString toInt stringToCharacters fixedWidthNumber concatStrings;
   inherit (lib.lists) fold last flatten zipListsWith imap0 subtractLists unique intersectLists range drop;
   inherit (lib.attrsets) nameValuePair attrByPath catAttrs cartesianProductOfSets genAttrs setAttrByPath getAttrFromPath recursiveUpdate;
   inherit (lib.debug) traceVal traceValFn traceValSeq traceSeq traceValSeqFn;
@@ -29,4 +29,5 @@ rec {
   minVal = x: fold min (head x) x;
   getStepped = step: base: list: map (x: x.v) (filter (x: mod (x.i - base + step) step == 0) (imap0 (i: v: {inherit i v;}) list));
   add = a: b: a+b;
+  abs = x: if x > 0 then x else -x;
 }
