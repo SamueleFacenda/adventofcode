@@ -6,7 +6,7 @@ rec {
   inherit (lib.lists) compareLists imap1 count sort fold last flatten zipListsWith imap0 subtractLists unique intersectLists range drop;
   inherit (lib.attrsets) filterAttrs nameValuePair attrByPath catAttrs cartesianProductOfSets genAttrs setAttrByPath getAttrFromPath recursiveUpdate;
   inherit (lib.debug) traceVal traceValFn traceValSeq traceSeq traceValSeqFn;
-  inherit (lib.trivial) max boolToString const concat min mod compare;
+  inherit (lib.trivial) max boolToString const concat min mod compare mergeAttrs;
   fileLines = file: filter
     (str: (stringLength str) > 0)
     (splitString "\n" (readFile file));
